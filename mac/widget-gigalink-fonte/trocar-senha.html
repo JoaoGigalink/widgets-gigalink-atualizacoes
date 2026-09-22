@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Widgets Gigalink — Trocar senha</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --surface-1:      rgba(210,250,255,0.58);
+    --surface-2:      rgba(120,205,240,0.32);
+    --gloss:          rgba(255,255,255,0.75);
+    --bubble:         rgba(255,255,255,0.85);
+    --rim:            rgba(90,210,235,0.65);
+    --text-primary:   #06222c;
+    --text-secondary: #1f5064;
+    --muted:          #4d7f92;
+    --border:         rgba(255,255,255,0.65);
+    --field-bg:       rgba(255,255,255,0.55);
+    --field-border:   rgba(6,60,80,0.18);
+    --accent:         #0d8fc4;
+    --accent-dark:    #086f9c;
+    --bad-text:       #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1:      rgba(8,45,58,0.58);
+      --surface-2:      rgba(4,22,32,0.38);
+      --gloss:          rgba(200,245,255,0.20);
+      --bubble:         rgba(255,255,255,0.30);
+      --rim:            rgba(70,200,225,0.5);
+      --text-primary:   #eafcff;
+      --text-secondary: #a9e2ef;
+      --muted:          #7bb6c7;
+      --border:         rgba(255,255,255,0.16);
+      --field-bg:       rgba(255,255,255,0.08);
+      --field-border:   rgba(255,255,255,0.16);
+      --accent:         #35c3ee;
+      --accent-dark:    #1fa3cd;
+      --bad-text:       #ef7a79;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: transparent;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .widget {
+    position: relative;
+    -webkit-app-region: drag;
+    height: 100%;
+    background: linear-gradient(160deg, var(--surface-1) 0%, var(--surface-2) 100%);
+    backdrop-filter: blur(20px) saturate(1.9);
+    -webkit-backdrop-filter: blur(20px) saturate(1.9);
+    border: 1px solid var(--rim);
+    border-radius: 20px;
+    padding: 18px 20px 16px;
+    overflow: hidden;
+    box-shadow:
+      0 12px 30px rgba(0,90,120,0.35),
+      inset 0 1px 0 var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .widget::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, var(--gloss) 0%, rgba(255,255,255,0) 100%);
+    border-radius: 20px 20px 60% 60% / 20px 20px 40% 40%;
+    pointer-events: none;
+  }
+  .widget::after {
+    content: "";
+    position: absolute;
+    top: 8%;
+    left: 8%;
+    width: 34%;
+    height: 22%;
+    background: radial-gradient(ellipse at 30% 30%, var(--bubble) 0%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0) 72%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(0.5px);
+  }
+  .title-row {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .close-btn {
+    -webkit-app-region: no-drag;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .close-btn:hover {
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(255,200,195,0.4) 32%, rgba(226,65,63,0.55) 70%),
+      linear-gradient(180deg, #ff9a94, #e2413f);
+    border-color: rgba(255,255,255,0.7);
+    box-shadow: 0 2px 8px rgba(220,40,40,0.45), inset 0 1px 0 rgba(255,255,255,0.7);
+    color: #fff;
+  }
+  .subtitle {
+    position: relative;
+    z-index: 1;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: -4px 0 2px;
+  }
+  .fields {
+    position: relative;
+    z-index: 1;
+    -webkit-app-region: no-drag;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    display: block;
+  }
+  input {
+    width: 100%;
+    padding: 9px 11px;
+    border-radius: 10px;
+    border: 1px solid var(--field-border);
+    background: var(--field-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(13,143,196,0.2);
+  }
+  button.primary {
+    -webkit-app-region: no-drag;
+    margin-top: 2px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.4);
+    background: linear-gradient(180deg, var(--accent), var(--accent-dark));
+    color: #fff;
+    font-size: 13px;
+    font-weight: 650;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(13,143,196,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
+    transition: filter .15s ease, transform .15s ease;
+  }
+  button.primary:hover { filter: brightness(1.08); }
+  button.primary:active { transform: translateY(1px); }
+  button.primary:disabled { opacity: 0.6; cursor: default; filter: none; transform: none; }
+  .error {
+    color: var(--bad-text);
+    font-size: 11px;
+    text-align: center;
+    min-height: 14px;
+  }
+  .cancel-btn {
+    -webkit-app-region: no-drag;
+    margin-top: 2px;
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--field-border);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cancel-btn:hover { background: rgba(255,255,255,0.15); }
+</style>
+</head>
+<body>
+  <div class="widget">
+    <div class="title-row">
+      <p class="title" id="titulo">Definir nova senha</p>
+      <button class="close-btn" id="closeBtn" title="Fechar" style="display:none">&times;</button>
+    </div>
+    <p class="subtitle" id="subtitulo">Esta é sua primeira vez entrando — troque a senha padrão antes de continuar.</p>
+    <div class="fields">
+      <div>
+        <label for="senhaNova">Nova senha (mín. 8 caracteres)</label>
+        <input id="senhaNova" type="password" autocomplete="new-password" />
+      </div>
+      <div>
+        <label for="senhaConfirma">Confirmar nova senha</label>
+        <input id="senhaConfirma" type="password" autocomplete="new-password" />
+      </div>
+      <p class="error" id="erro"></p>
+      <button class="primary" id="salvarBtn">Salvar e continuar</button>
+      <button class="cancel-btn" id="cancelarBtn" style="display:none">Cancelar</button>
+    </div>
+  </div>
+
+<script>
+const forced = new URLSearchParams(location.search).get("forced") !== "0";
+if (!forced) {
+  document.getElementById("titulo").textContent = "Trocar senha";
+  document.getElementById("subtitulo").textContent = "Defina uma nova senha para o seu acesso.";
+  document.getElementById("cancelarBtn").style.display = "block";
+  document.getElementById("closeBtn").style.display = "";
+}
+
+const senhaNovaEl = document.getElementById("senhaNova");
+const senhaConfirmaEl = document.getElementById("senhaConfirma");
+const erroEl = document.getElementById("erro");
+const btn = document.getElementById("salvarBtn");
+
+document.getElementById("closeBtn").addEventListener("click", () => {
+  window.widgetAPI.close();
+});
+document.getElementById("cancelarBtn").addEventListener("click", () => {
+  window.widgetAPI.close();
+});
+
+async function salvar() {
+  const senhaNova = senhaNovaEl.value;
+  const senhaConfirma = senhaConfirmaEl.value;
+
+  if (senhaNova.length < 8) {
+    erroEl.textContent = "A senha precisa ter pelo menos 8 caracteres.";
+    return;
+  }
+  if (senhaNova !== senhaConfirma) {
+    erroEl.textContent = "As senhas não conferem.";
+    return;
+  }
+
+  btn.disabled = true;
+  erroEl.textContent = "";
+  const resultado = await window.widgetAPI.trocarSenha(senhaNova);
+  if (!resultado.ok) {
+    erroEl.textContent = resultado.error || "Não foi possível salvar a senha.";
+    btn.disabled = false;
+  }
+  // se ok, o processo principal fecha esta janela e abre os widgets sozinho
+}
+
+btn.addEventListener("click", salvar);
+senhaConfirmaEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") salvar();
+});
+</script>
+</body>
+</html>

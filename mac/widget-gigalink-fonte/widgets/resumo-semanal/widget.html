@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Resumo semanal</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --surface-1:      rgba(210,250,255,0.58);
+    --surface-2:      rgba(120,205,240,0.32);
+    --gloss:          rgba(255,255,255,0.75);
+    --bubble:         rgba(255,255,255,0.85);
+    --rim:            rgba(90,210,235,0.65);
+    --text-primary:   #06222c;
+    --text-secondary: #1f5064;
+    --muted:          #4d7f92;
+    --baseline:       #aee0ec;
+    --border:         rgba(255,255,255,0.65);
+    --divider:        rgba(10,70,90,0.10);
+    --pos:            #0d8fc4;
+    --neg:            #e34948;
+    --good-text:      #027a3d;
+    --bad-text:       #b3261e;
+    --esteira:        #0d8fc4;
+    --churn:          #e34948;
+    --vend-1:         #0d8fc4;
+    --vend-2:         #4fbf6e;
+    --vend-3:         #e8a33d;
+    --vend-4:         #9b6bd6;
+    --update-dot:     #f2b93b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1:      rgba(8,45,58,0.58);
+      --surface-2:      rgba(4,22,32,0.38);
+      --gloss:          rgba(200,245,255,0.20);
+      --bubble:         rgba(255,255,255,0.30);
+      --rim:            rgba(70,200,225,0.5);
+      --text-primary:   #eafcff;
+      --text-secondary: #a9e2ef;
+      --muted:          #7bb6c7;
+      --baseline:       #2c5a68;
+      --border:         rgba(255,255,255,0.16);
+      --divider:        rgba(255,255,255,0.08);
+      --pos:            #35c3ee;
+      --neg:            #ef7a79;
+      --good-text:      #35d488;
+      --bad-text:       #ef7a79;
+      --esteira:        #35c3ee;
+      --churn:          #ef7a79;
+      --vend-1:         #35c3ee;
+      --vend-2:         #6fe08f;
+      --vend-3:         #f2c169;
+      --vend-4:         #c49bee;
+      --update-dot:     #ffce5c;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: transparent;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .widget {
+    position: relative;
+    -webkit-app-region: drag;
+    height: 100%;
+    background: linear-gradient(160deg, var(--surface-1) 0%, var(--surface-2) 100%);
+    backdrop-filter: blur(20px) saturate(1.9);
+    -webkit-backdrop-filter: blur(20px) saturate(1.9);
+    border: 1px solid var(--rim);
+    border-radius: 20px;
+    padding: 14px 18px 12px;
+    overflow: hidden;
+    box-shadow:
+      0 12px 30px rgba(0,90,120,0.35),
+      inset 0 1px 0 var(--border);
+  }
+  .widget::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, var(--gloss) 0%, rgba(255,255,255,0) 100%);
+    border-radius: 20px 20px 60% 60% / 20px 20px 40% 40%;
+    pointer-events: none;
+  }
+  .widget::after {
+    content: "";
+    position: absolute;
+    top: 8%;
+    left: 8%;
+    width: 34%;
+    height: 22%;
+    background: radial-gradient(ellipse at 30% 30%, var(--bubble) 0%, rgba(255,255,255,0.15) 45%, rgba(255,255,255,0) 72%);
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(0.5px);
+  }
+  .sparkle {
+    position: absolute;
+    pointer-events: none;
+    color: var(--bubble);
+    font-size: 10px;
+    line-height: 1;
+    text-shadow: 0 0 4px var(--rim);
+    opacity: 0.9;
+  }
+  .sparkle.s1 { top: 10px; right: 46px; font-size: 8px; }
+  .sparkle.s2 { bottom: 30px; left: 14px; font-size: 12px; opacity: 0.6; }
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .title {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .title-actions {
+    -webkit-app-region: no-drag;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .icon-btn {
+    -webkit-app-region: no-drag;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--sphere-rim, rgba(255,255,255,0.35));
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.25) 30%, transparent 62%),
+      linear-gradient(165deg, var(--sphere-top, #7f97ab), var(--sphere-bottom, #38424c));
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 2px 5px var(--sphere-shadow, rgba(20,30,40,0.45)),
+      inset 0 1px 0 rgba(255,255,255,0.55),
+      inset 0 -3px 5px rgba(0,0,0,0.25);
+    text-shadow: 0 1px 1px rgba(0,0,0,0.35);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  }
+  .icon-btn#contaBtn        { --sphere-top: #7d94ab; --sphere-bottom: #33404d; --sphere-rim: rgba(200,220,235,0.7); --sphere-shadow: rgba(20,30,42,0.55); }
+  .icon-btn#refreshBtn      { --sphere-top: #3f97f7; --sphere-bottom: #0f3f80; --sphere-rim: rgba(140,200,255,0.7); --sphere-shadow: rgba(10,45,100,0.55); }
+  .icon-btn#configVendedoresBtn { --sphere-top: #9b6de6; --sphere-bottom: #4a2c85; --sphere-rim: rgba(210,175,245,0.7); --sphere-shadow: rgba(50,25,95,0.55); }
+  .icon-btn#trocarSenhaBtn  { --sphere-top: #566070; --sphere-bottom: #14171c; --sphere-rim: rgba(180,190,200,0.6); --sphere-shadow: rgba(5,7,10,0.6); }
+  .icon-btn#logoutBtn       { --sphere-top: #f0654f; --sphere-bottom: #96261a; --sphere-rim: rgba(255,180,165,0.7); --sphere-shadow: rgba(100,25,15,0.55); }
+  .icon-btn:hover {
+    filter: brightness(1.12);
+    box-shadow:
+      0 3px 9px var(--sphere-shadow, rgba(20,30,40,0.55)),
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      inset 0 -3px 5px rgba(0,0,0,0.25);
+    transform: translateY(-1px);
+  }
+  .icon-btn:active { transform: translateY(0); filter: brightness(0.96); }
+  .icon-btn.spinning { animation: spin 0.6s cubic-bezier(.4,0,.2,1); }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .update-dot {
+    -webkit-app-region: no-drag;
+    display: none;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+  }
+  .update-dot::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--update-dot);
+    box-shadow: 0 0 6px var(--update-dot);
+  }
+  .update-dot.visible { display: flex; cursor: pointer; }
+  .close-btn {
+    -webkit-app-region: no-drag;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .close-btn:hover {
+    background:
+      radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(255,200,195,0.4) 32%, rgba(226,65,63,0.55) 70%),
+      linear-gradient(180deg, #ff9a94, #e2413f);
+    border-color: rgba(255,255,255,0.7);
+    box-shadow: 0 2px 8px rgba(220,40,40,0.45), inset 0 1px 0 rgba(255,255,255,0.7);
+    color: #fff;
+  }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0 0 8px;
+  }
+  .slides {
+    position: relative;
+    height: 156px;
+  }
+  .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: none;
+  }
+  .slide.active {
+    display: block;
+  }
+  .dots {
+    -webkit-app-region: no-drag;
+    display: flex;
+    justify-content: center;
+    gap: 1px;
+    margin-top: 8px;
+  }
+  .dot {
+    -webkit-app-region: no-drag;
+    position: relative;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .dot::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 55%),
+      var(--baseline);
+    opacity: 0.7;
+    transform: translate(-50%, -50%);
+  }
+  .dot.active::after {
+    background:
+      radial-gradient(circle at 30% 25%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 55%),
+      var(--pos);
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+  .hero-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .hero-value {
+    font-size: 24px;
+    font-weight: 650;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-delta {
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--text-secondary);
+  }
+  .swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+  .stat-row {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-size: 16px;
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  svg { display: block; overflow: visible; -webkit-app-region: no-drag; }
+  .axis-label { font-size: 9px; fill: var(--muted); }
+  .tooltip {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    pointer-events: none;
+    background: var(--text-primary);
+    color: var(--surface-1);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.1s;
+    transform: translate(-50%, -100%);
+    z-index: 10;
+  }
+  .chart-wrap { position: relative; }
+  .error { color: var(--bad-text); font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="widget">
+    <span class="sparkle s1">&#10022;</span>
+    <span class="sparkle s2">&#10022;</span>
+    <div class="title-row">
+      <p class="title">Resumo semanal</p>
+      <div class="title-actions">
+        <span class="update-dot" id="updateDot" title="Atualização disponível"></span>
+        <button class="icon-btn" id="contaBtn" title="Conta conectada">&#128100;</button>
+        <button class="icon-btn" id="refreshBtn" title="Atualizar dados">&#8635;</button>
+        <button class="icon-btn" id="configVendedoresBtn" title="Configurar vendedores" style="display:none">&#9881;</button>
+        <button class="icon-btn" id="trocarSenhaBtn" title="Trocar senha">&#128274;</button>
+        <button class="icon-btn" id="logoutBtn" title="Sair da conta">&#128682;</button>
+        <button class="close-btn" id="closeBtn" title="Fechar widget">&times;</button>
+      </div>
+    </div>
+
+    <div class="slides">
+      <div class="slide active" data-slide="0">
+        <p class="section-label">Faturamento</p>
+        <div id="faturamento-content">Carregando…</div>
+      </div>
+      <div class="slide" data-slide="1">
+        <p class="section-label">Esteira vs Churn</p>
+        <div class="legend">
+          <div class="legend-item"><span class="swatch" style="background:var(--esteira)"></span>Esteira</div>
+          <div class="legend-item"><span class="swatch" style="background:var(--churn)"></span>Churn (acumulado)</div>
+        </div>
+        <div id="esteira-churn-content">Carregando…</div>
+      </div>
+      <div class="slide" data-slide="2">
+        <p class="section-label">Vendas por Vendedor (mês)</p>
+        <div id="vendas-vendedor-content">Carregando…</div>
+      </div>
+    </div>
+
+    <div class="dots" id="dots">
+      <button class="dot active" data-dot="0" title="Faturamento"></button>
+      <button class="dot" data-dot="1" title="Esteira vs Churn"></button>
+      <button class="dot" data-dot="2" title="Vendas por Vendedor"></button>
+    </div>
+  </div>
+
+<script>
+if (window.widgetAPI && window.widgetAPI.onAtualizacaoPronta) {
+  window.widgetAPI.onAtualizacaoPronta((info) => {
+    const dot = document.getElementById("updateDot");
+    dot.classList.add("visible");
+    dot.title = `Atualização ${info?.versao || ""} baixada — clique para instalar e reiniciar`;
+  });
+  window.widgetAPI.verificarAtualizacao().then((info) => {
+    if (!info) return;
+    const dot = document.getElementById("updateDot");
+    dot.classList.add("visible");
+    dot.title = `Atualização ${info.versao} baixada — clique para instalar e reiniciar`;
+  });
+}
+
+document.getElementById("updateDot").addEventListener("click", () => {
+  const dot = document.getElementById("updateDot");
+  if (!dot.classList.contains("visible")) return;
+  if (!confirm("Instalar a atualização agora? O app vai fechar e reabrir sozinho.")) return;
+  window.widgetAPI.instalarAtualizacao();
+});
+
+let BASE_URL = null;
+let WIDGET_KEY = null;
+let ROLE = "diretor";
+const configReady = window.widgetAPI.getServerConfig().then((cfg) => {
+  BASE_URL = cfg.baseUrl;
+  WIDGET_KEY = cfg.widgetKey;
+  ROLE = cfg.role || "diretor";
+  if (ROLE === "diretor") {
+    document.getElementById("configVendedoresBtn").style.display = "";
+  }
+  const contaBtn = document.getElementById("contaBtn");
+  contaBtn.title = cfg.usuario ? `Conectado como: ${cfg.usuario}` : "Conta conectada";
+});
+
+function authHeaders() {
+  return WIDGET_KEY ? { "x-widget-key": WIDGET_KEY } : {};
+}
+
+document.getElementById("closeBtn").addEventListener("click", () => {
+  if (window.widgetAPI) window.widgetAPI.close();
+});
+
+document.getElementById("configVendedoresBtn").addEventListener("click", () => {
+  if (window.widgetAPI) window.widgetAPI.abrirConfigVendedores();
+});
+
+document.getElementById("trocarSenhaBtn").addEventListener("click", () => {
+  if (window.widgetAPI) window.widgetAPI.abrirTrocarSenha();
+});
+
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  if (!window.widgetAPI) return;
+  if (!confirm("Sair da conta atual? Vai ser preciso logar de novo.")) return;
+  window.widgetAPI.sessaoExpirada();
+});
+
+document.getElementById("refreshBtn").addEventListener("click", (e) => {
+  const btn = e.currentTarget;
+  btn.classList.remove("spinning");
+  void btn.offsetWidth;
+  btn.classList.add("spinning");
+  loadAll();
+});
+
+function fmtBRL(v) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+}
+
+function smoothPath(points) {
+  if (points.length < 2) return "";
+  if (points.length === 2) {
+    return `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)} L${points[1].x.toFixed(1)},${points[1].y.toFixed(1)}`;
+  }
+  let d = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 = points[i + 2] || p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+function attachTooltip(container, data, buildText) {
+  const tooltip = container.querySelector(".tooltip");
+  container.querySelectorAll(".bar").forEach(bar => {
+    bar.addEventListener("mouseenter", () => {
+      tooltip.innerHTML = buildText(data[+bar.dataset.i]);
+      tooltip.style.opacity = 1;
+    });
+    bar.addEventListener("mousemove", (e) => {
+      const rect = container.querySelector("svg").getBoundingClientRect();
+      tooltip.style.left = (e.clientX - rect.left) + "px";
+      tooltip.style.top = (e.clientY - rect.top - 8) + "px";
+    });
+    bar.addEventListener("mouseleave", () => { tooltip.style.opacity = 0; });
+  });
+}
+
+function renderFaturamento(data) {
+  const el = document.getElementById("faturamento-content");
+  if (!data || !data.length) { el.innerHTML = '<p class="error">Sem dados.</p>'; return; }
+
+  const last = data[data.length - 1];
+  const isPos = last.variacao_semana >= 0;
+
+  const W = 320, H = 70, padTop = 8, padBottom = 16;
+  const n = data.length;
+  const xStep = n > 1 ? W / (n - 1) : 0;
+  const xAt = i => n > 1 ? i * xStep : W / 2;
+
+  const vals = data.map(d => d.faturamento);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV;
+  const pad = range > 0 ? range * 0.18 : Math.max(maxV * 0.05, 1);
+  const lo = minV - pad, hi = maxV + pad;
+  const yAt = v => padTop + (H - padTop - padBottom) * (1 - (v - lo) / (hi - lo || 1));
+
+  const points = data.map((d, i) => ({ x: xAt(i), y: yAt(d.faturamento) }));
+  const baseY = H - padBottom;
+
+  const linePath = smoothPath(points);
+  const lastPt = points[points.length - 1];
+  const areaPath = `${linePath} L${lastPt.x.toFixed(1)},${baseY} L${points[0].x.toFixed(1)},${baseY} Z`;
+
+  const dots = points.map((p, i) => {
+    const isLast = i === points.length - 1;
+    return `
+      <circle class="bar" data-i="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="8" fill="transparent"></circle>
+      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${isLast ? 3 : 1.8}" fill="var(--pos)" ${isLast ? 'stroke="var(--surface-1)" stroke-width="1.5"' : ""}></circle>
+    `;
+  }).join("");
+
+  const labelStep = Math.ceil(n / 6);
+  let labels = "";
+  data.forEach((d, i) => {
+    if (i % labelStep !== 0 && i !== n - 1) return;
+    labels += `<text class="axis-label" x="${xAt(i).toFixed(1)}" y="${H}" text-anchor="middle">S${d.semana}</text>`;
+  });
+
+  el.innerHTML = `
+    <div class="hero-row">
+      <div>
+        <div class="hero-value">${fmtBRL(last.faturamento)}</div>
+        <div class="hero-sub">semana ${last.semana} &middot; ${last.ultima_data}</div>
+      </div>
+      <div class="hero-delta" style="color: var(${isPos ? '--good-text' : '--bad-text'})">
+        ${isPos ? "▲" : "▼"} ${fmtBRL(Math.abs(last.variacao_semana))}
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+        <defs>
+          <linearGradient id="fatGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--pos)" stop-opacity="0.40"></stop>
+            <stop offset="100%" stop-color="var(--pos)" stop-opacity="0"></stop>
+          </linearGradient>
+          <filter id="fatGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="1.6" result="blur"></feGaussianBlur>
+            <feMerge>
+              <feMergeNode in="blur"></feMergeNode>
+              <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+          </filter>
+        </defs>
+        <line x1="0" y1="${baseY}" x2="${W}" y2="${baseY}" stroke="var(--baseline)" stroke-width="1" stroke-dasharray="2 3"></line>
+        <path d="${areaPath}" fill="url(#fatGradient)"></path>
+        <path d="${linePath}" fill="none" stroke="var(--pos)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#fatGlow)"></path>
+        ${dots}
+        ${labels}
+      </svg>
+      <div class="tooltip"></div>
+    </div>
+  `;
+
+  attachTooltip(el, data, d => `Semana ${d.semana}<br>${fmtBRL(d.faturamento)} (${d.variacao_semana >= 0 ? "+" : ""}${fmtBRL(d.variacao_semana)})`);
+}
+
+function renderEsteiraChurn(data) {
+  const el = document.getElementById("esteira-churn-content");
+  if (!data || !data.length) { el.innerHTML = '<p class="error">Sem dados.</p>'; return; }
+
+  const last = data[data.length - 1];
+  const estVar = last.variacao_esteira;
+  const estVarStr = estVar != null ? `${estVar >= 0 ? "+" : ""}${estVar.toFixed(1)}%` : `sem. ${last.semana}`;
+
+  const W = 320, H = 70, padTop = 6, padBottom = 16;
+  const n = data.length;
+  const xStep = n > 1 ? W / (n - 1) : 0;
+  const xAt = i => n > 1 ? i * xStep : W / 2;
+  const baseY = H - padBottom;
+
+  const maxVal = Math.max(...data.map(d => Math.max(d.esteira_ativacao, d.churn)), 1);
+  const yAt = v => padTop + (baseY - padTop) * (1 - v / maxVal);
+
+  const esteiraPts = data.map((d, i) => ({ x: xAt(i), y: yAt(d.esteira_ativacao) }));
+  const churnPts = data.map((d, i) => ({ x: xAt(i), y: yAt(d.churn) }));
+
+  const esteiraLine = smoothPath(esteiraPts);
+  const churnLine = smoothPath(churnPts);
+  const esteiraLast = esteiraPts[esteiraPts.length - 1];
+  const churnLast = churnPts[churnPts.length - 1];
+  const esteiraArea = `${esteiraLine} L${esteiraLast.x.toFixed(1)},${baseY} L${esteiraPts[0].x.toFixed(1)},${baseY} Z`;
+  const churnArea = `${churnLine} L${churnLast.x.toFixed(1)},${baseY} L${churnPts[0].x.toFixed(1)},${baseY} Z`;
+
+  const hoverTargets = data.map((d, i) => `
+    <circle class="bar" data-i="${i}" cx="${esteiraPts[i].x.toFixed(1)}" cy="${((esteiraPts[i].y + churnPts[i].y) / 2).toFixed(1)}" r="9" fill="transparent"></circle>
+  `).join("");
+  const dots = data.map((d, i) => {
+    const isLast = i === data.length - 1;
+    const r = isLast ? 3 : 1.6;
+    return `
+      <circle cx="${esteiraPts[i].x.toFixed(1)}" cy="${esteiraPts[i].y.toFixed(1)}" r="${r}" fill="var(--esteira)" ${isLast ? 'stroke="var(--surface-1)" stroke-width="1.5"' : ""}></circle>
+      <circle cx="${churnPts[i].x.toFixed(1)}" cy="${churnPts[i].y.toFixed(1)}" r="${r}" fill="var(--churn)" ${isLast ? 'stroke="var(--surface-1)" stroke-width="1.5"' : ""}></circle>
+    `;
+  }).join("");
+
+  const labelStep = Math.ceil(n / 6);
+  let labels = "";
+  data.forEach((d, i) => {
+    if (i % labelStep !== 0 && i !== n - 1) return;
+    labels += `<text class="axis-label" x="${xAt(i).toFixed(1)}" y="${H}" text-anchor="middle">S${d.semana}</text>`;
+  });
+
+  el.innerHTML = `
+    <div class="stat-row">
+      <div>
+        <div class="stat-value" style="color:var(--esteira)">${fmtBRL(last.esteira_ativacao)}</div>
+        <div class="stat-label">esteira &middot; ${estVarStr}</div>
+      </div>
+      <div>
+        <div class="stat-value" style="color:var(--churn)">${fmtBRL(last.churn)}</div>
+        <div class="stat-label">churn acumulado &middot; ${last.churn_pct != null ? last.churn_pct + '%' : '—'}</div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+        <defs>
+          <linearGradient id="esteiraGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--esteira)" stop-opacity="0.35"></stop>
+            <stop offset="100%" stop-color="var(--esteira)" stop-opacity="0"></stop>
+          </linearGradient>
+          <linearGradient id="churnGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--churn)" stop-opacity="0.25"></stop>
+            <stop offset="100%" stop-color="var(--churn)" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        <line x1="0" y1="${baseY}" x2="${W}" y2="${baseY}" stroke="var(--baseline)" stroke-width="1"></line>
+        <path d="${churnArea}" fill="url(#churnGradient)"></path>
+        <path d="${esteiraArea}" fill="url(#esteiraGradient)"></path>
+        <path d="${churnLine}" fill="none" stroke="var(--churn)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="${esteiraLine}" fill="none" stroke="var(--esteira)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        ${dots}
+        ${hoverTargets}
+        ${labels}
+      </svg>
+      <div class="tooltip"></div>
+    </div>
+  `;
+
+  attachTooltip(el, data, d => `Semana ${d.semana}<br>Esteira: ${fmtBRL(d.esteira_ativacao)}<br>Churn acumulado: ${fmtBRL(d.churn)} (${d.churn_pct ?? '—'}%)`);
+}
+
+const CORES_PADRAO = ["var(--vend-1)", "var(--vend-2)", "var(--vend-3)", "var(--vend-4)"];
+
+function renderVendasVendedor(data) {
+  if (Array.isArray(data)) {
+    renderVendasVendedorDiretor(data);
+  } else {
+    renderVendasVendedorAnonimo(data);
+  }
+}
+
+async function buscarConfigVendedores() {
+  try {
+    const res = await fetch(`${BASE_URL}/widget/config-vendedores`, { headers: authHeaders(), cache: "no-store" });
+    if (!res.ok) return [];
+    const raw = await res.text();
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function renderVendasVendedorDiretor(data) {
+  const el = document.getElementById("vendas-vendedor-content");
+
+  const config = await buscarConfigVendedores();
+
+  let filtrado;
+  if (config.length) {
+    filtrado = config
+      .filter(c => c.visivel)
+      .map(c => {
+        const match = (data || []).find(d => (d.vendedor || "") === c.vendedor_nome);
+        return { label: c.vendedor_nome.split(" ")[0], nomeCompleto: c.vendedor_nome, total_vendido: match ? match.total_vendido : 0, cor: c.cor };
+      })
+      .sort((a, b) => b.total_vendido - a.total_vendido);
+  } else {
+    // Fallback: sem config salva ainda -- mostra todos os vendedores retornados pelo backend
+    filtrado = (data || []).map((d, i) => ({
+      label: (d.vendedor || "").split(" ")[0], nomeCompleto: d.vendedor, total_vendido: d.total_vendido, cor: CORES_PADRAO[i % CORES_PADRAO.length],
+    }));
+  }
+
+  if (!filtrado.length || !filtrado.some(d => d.total_vendido > 0)) {
+    el.innerHTML = '<p class="error">Sem dados.</p>';
+    return;
+  }
+
+  const W = 320, H = 70, padTop = 4, padBottom = 16;
+  const barGap = 40;
+  const barW = (W / filtrado.length) - barGap;
+  const maxVal = Math.max(...filtrado.map(d => d.total_vendido), 1);
+  const scale = (H - padTop - padBottom) / maxVal;
+
+  let bars = "";
+  filtrado.forEach((d, i) => {
+    const x = i * (barW + barGap) + barGap / 2;
+    const h = d.total_vendido * scale;
+    bars += `<rect class="bar" data-i="${i}" x="${x}" y="${H - padBottom - h}" width="${barW}" height="${Math.max(h,1)}" rx="3" style="fill:${d.cor}"></rect>`;
+  });
+
+  let labels = "";
+  filtrado.forEach((d, i) => {
+    const x = i * (barW + barGap) + barGap / 2 + barW / 2;
+    labels += `<text class="axis-label" x="${x}" y="${H}" text-anchor="middle">${d.label}</text>`;
+  });
+
+  const statRow = filtrado.map((d, i) => `
+    <div>
+      <div class="stat-value" style="color:${d.cor}">${fmtBRL(d.total_vendido)}</div>
+      <div class="stat-label">${d.label}</div>
+    </div>
+  `).join("");
+
+  el.innerHTML = `
+    <div class="stat-row">${statRow}</div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+        <line x1="0" y1="${H - padBottom}" x2="${W}" y2="${H - padBottom}" stroke="var(--baseline)" stroke-width="1"></line>
+        ${bars}
+        ${labels}
+      </svg>
+      <div class="tooltip"></div>
+    </div>
+  `;
+
+  attachTooltip(el, filtrado, d => `${d.nomeCompleto}: ${fmtBRL(d.total_vendido)}`);
+}
+
+function renderVendasVendedorAnonimo(data) {
+  const el = document.getElementById("vendas-vendedor-content");
+  if (!data) { el.innerHTML = '<p class="error">Sem dados.</p>'; return; }
+
+  const itens = [
+    { label: "Você", valor: data.meu_valor || 0, cor: "var(--vend-1)" },
+    { label: "Melhor do mês", valor: data.melhor_mes || 0, cor: "var(--muted)" },
+    { label: "Média do mês", valor: data.media_mes || 0, cor: "var(--vend-2)" },
+  ];
+
+  if (!itens.some(d => d.valor > 0)) {
+    el.innerHTML = '<p class="error">Sem dados.</p>';
+    return;
+  }
+
+  const W = 320, H = 70, padTop = 4, padBottom = 16;
+  const barGap = 30;
+  const barW = (W / itens.length) - barGap;
+  const maxVal = Math.max(...itens.map(d => d.valor), 1);
+  const scale = (H - padTop - padBottom) / maxVal;
+
+  let bars = "";
+  itens.forEach((d, i) => {
+    const x = i * (barW + barGap) + barGap / 2;
+    const h = d.valor * scale;
+    bars += `<rect class="bar" data-i="${i}" x="${x}" y="${H - padBottom - h}" width="${barW}" height="${Math.max(h,1)}" rx="3" style="fill:${d.cor}"></rect>`;
+  });
+
+  let labels = "";
+  itens.forEach((d, i) => {
+    const x = i * (barW + barGap) + barGap / 2 + barW / 2;
+    labels += `<text class="axis-label" x="${x}" y="${H}" text-anchor="middle">${d.label}</text>`;
+  });
+
+  const statRow = itens.map(d => `
+    <div>
+      <div class="stat-value" style="color:${d.cor}">${fmtBRL(d.valor)}</div>
+      <div class="stat-label">${d.label}</div>
+    </div>
+  `).join("");
+
+  el.innerHTML = `
+    <div class="stat-row">${statRow}</div>
+    <div class="chart-wrap">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}">
+        <line x1="0" y1="${H - padBottom}" x2="${W}" y2="${H - padBottom}" stroke="var(--baseline)" stroke-width="1"></line>
+        ${bars}
+        ${labels}
+      </svg>
+      <div class="tooltip"></div>
+    </div>
+  `;
+
+  attachTooltip(el, itens, d => `${d.label}: ${fmtBRL(d.valor)}`);
+}
+
+let sessaoExpirando = false;
+function handleUnauthorized() {
+  if (sessaoExpirando) return true;
+  sessaoExpirando = true;
+  if (window.widgetAPI && window.widgetAPI.sessaoExpirada) {
+    window.widgetAPI.sessaoExpirada();
+  }
+  return true;
+}
+
+async function loadFaturamento() {
+  try {
+    await configReady;
+    const res = await fetch(`${BASE_URL}/widget/faturamento-semanal`, { headers: authHeaders(), cache: "no-store" });
+    if (res.status === 401 && handleUnauthorized()) return;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    renderFaturamento(data);
+  } catch (e) {
+    document.getElementById("faturamento-content").innerHTML = `<p class="error">Erro: ${e.message}</p>`;
+  }
+}
+
+async function loadEsteiraChurn() {
+  try {
+    await configReady;
+    const res = await fetch(`${BASE_URL}/widget/esteira-churn-semanal`, { headers: authHeaders(), cache: "no-store" });
+    if (res.status === 401 && handleUnauthorized()) return;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    renderEsteiraChurn(await res.json());
+  } catch (e) {
+    document.getElementById("esteira-churn-content").innerHTML = `<p class="error">Erro: ${e.message}</p>`;
+  }
+}
+
+async function loadVendasVendedor() {
+  try {
+    await configReady;
+    const res = await fetch(`${BASE_URL}/widget/vendas-por-vendedor`, { headers: authHeaders(), cache: "no-store" });
+    if (res.status === 401 && handleUnauthorized()) return;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    renderVendasVendedor(raw ? JSON.parse(raw) : []);
+  } catch (e) {
+    document.getElementById("vendas-vendedor-content").innerHTML = `<p class="error">Erro: ${e.message}</p>`;
+  }
+}
+
+function loadAll() {
+  if (ROLE === "diretor") {
+    loadFaturamento();
+    loadEsteiraChurn();
+  }
+  loadVendasVendedor();
+}
+
+function applyRoleUI() {
+  if (ROLE !== "vendedor") return;
+  document.querySelector('[data-slide="0"]').remove();
+  document.querySelector('[data-slide="1"]').remove();
+  document.querySelector('[data-dot="0"]').remove();
+  document.querySelector('[data-dot="1"]').remove();
+  document.getElementById("dots").style.display = "none";
+  const vendasSlide = document.querySelector('[data-slide="2"]');
+  vendasSlide.classList.add("active");
+  vendasSlide.querySelector(".section-label").textContent = "Minhas Vendas (mês)";
+}
+
+const SLIDE_MS = 8000;
+let slides = [];
+let dots = [];
+let currentSlide = 0;
+let autoTimer = null;
+
+function goToSlide(i) {
+  currentSlide = i;
+  slides.forEach(s => s.classList.toggle("active", +s.dataset.slide === i));
+  dots.forEach(d => d.classList.toggle("active", +d.dataset.dot === i));
+}
+
+function nextSlide() {
+  if (slides.length < 2) return;
+  goToSlide((currentSlide + 1) % slides.length);
+}
+
+function resetAutoAdvance() {
+  if (autoTimer) clearInterval(autoTimer);
+  if (slides.length < 2) return;
+  autoTimer = setInterval(nextSlide, SLIDE_MS);
+}
+
+configReady.then(() => {
+  applyRoleUI();
+  slides = Array.from(document.querySelectorAll(".slide"));
+  dots = Array.from(document.querySelectorAll(".dot"));
+  dots.forEach(dot => {
+    dot.addEventListener("click", () => {
+      goToSlide(+dot.dataset.dot);
+      resetAutoAdvance();
+    });
+  });
+
+  loadAll();
+  setInterval(loadAll, 60000);
+  resetAutoAdvance();
+});
+</script>
+</body>
+</html>

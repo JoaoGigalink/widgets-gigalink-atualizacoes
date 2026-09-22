@@ -1,0 +1,10 @@
+{
+  "id": "resumo-semanal",
+  "title": "Resumo semanal",
+  "html": "widget.html",
+  "width": 380,
+  "height": 230,
+  "x": 40,
+  "y": 40,
+  "alwaysOnTop": false
+}
