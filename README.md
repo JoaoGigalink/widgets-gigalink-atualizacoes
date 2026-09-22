@@ -5,6 +5,11 @@ Gigalink — guias de instalação por sistema operacional (`windows/`,
 `mac/`) e os instaladores publicados nas
 [Releases](https://github.com/JoaoGigalink/widgets-gigalink-atualizacoes/releases).
 
+## Instalação rápida (mandar pra quem vai instalar)
+
+- **Windows**: [`windows/PASSO-A-PASSO.md`](windows/PASSO-A-PASSO.md)
+- **Mac**: [`mac/PASSO-A-PASSO.md`](mac/PASSO-A-PASSO.md)
+
 ## Como funciona hoje (a partir da versão 0.2.0)
 
 - **Windows**: o app tem atualização automática de verdade
@@ -25,9 +30,11 @@ Gigalink — guias de instalação por sistema operacional (`windows/`,
 ```
 README.md                          <- este arquivo
 windows/
+  PASSO-A-PASSO.md                 <- guia curto pra mandar pra quem vai instalar
   LEIA-ME.md                       <- guia de instalação simples
   INSTALACAO.md                    <- guia técnico completo (troubleshooting)
 mac/
+  PASSO-A-PASSO.md                 <- guia curto pra mandar pra quem vai instalar
   LEIA-ME.md                       <- guia de instalação simples
   INSTALACAO.md                    <- guia técnico completo (troubleshooting)
   INSTRUCOES_CLAUDE_CODE_MAC.md    <- passo a passo pro Claude Code gerar o .dmg
